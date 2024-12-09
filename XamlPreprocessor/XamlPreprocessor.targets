@@ -1,0 +1,15 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<UsingTask TaskName="XamlPreprocessor.PreprocessXamlTask"
+			   AssemblyFile="$(MSBuildThisFileDirectory)../lib/net472/XamlPreprocessor.dll" />
+
+	<PropertyGroup>
+		<XsltPath>$(MSBuildThisFileDirectory)../content/preprocess.xslt</XsltPath>
+	</PropertyGroup>
+
+	<Target Name="PreprocessXaml" BeforeTargets="MarkupCompilePass1">
+		<PreprocessXamlTask
+		  DefineConstants="$(DefineConstants)"
+		  XamlFiles="@(Page)"
+		  XsltPath="$(XsltPath)" />
+	</Target>
+</Project>

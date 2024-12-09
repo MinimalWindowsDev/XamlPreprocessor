@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<package>
+	<metadata>
+		<id>XamlPreprocessor</id>
+		<version>1.0.0</version>
+		<authors>Your Name</authors>
+		<description>XAML preprocessor for conditional compilation</description>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<dependencies>
+			<group targetFramework=".NETFramework4.7.2" />
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="bin\Release\XamlPreprocessor.dll" target="lib\net472" />
+		<file src="bin\Release\preprocess.xslt" target="content" />
+		<file src="XamlPreprocessor.targets" target="build" />
+	</files>
+</package>
