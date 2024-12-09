@@ -4,12 +4,39 @@
 
 	<PropertyGroup>
 		<XsltPath>$(MSBuildThisFileDirectory)../content/preprocess.xslt</XsltPath>
+		<PreprocessedXamlDir>$(IntermediateOutputPath)PreprocessedXaml</PreprocessedXamlDir>
 	</PropertyGroup>
 
+	<!-- Run before the XAML compilation starts -->
 	<Target Name="PreprocessXaml" BeforeTargets="MarkupCompilePass1">
+		<!-- Create temp directory if it doesn't exist -->
+		<MakeDir Directories="$(PreprocessedXamlDir)" />
+
+		<!-- Copy XAML files to temp directory -->
+		<Copy SourceFiles="@(Page)"
+			  DestinationFiles="@(Page->'$(PreprocessedXamlDir)\%(RecursiveDir)%(Filename)%(Extension)')">
+			<Output TaskParameter="CopiedFiles" ItemName="PreprocessedXamlFiles" />
+		</Copy>
+
+		<!-- Run preprocessor on copied files -->
 		<PreprocessXamlTask
 		  DefineConstants="$(DefineConstants)"
-		  XamlFiles="@(Page)"
+		  XamlFiles="@(PreprocessedXamlFiles)"
 		  XsltPath="$(XsltPath)" />
+
+		<!-- Update Page items to use preprocessed files -->
+		<ItemGroup>
+			<Page Remove="@(Page)" />
+			<Page Include="@(PreprocessedXamlFiles)">
+				<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+				<SubType>Designer</SubType>
+				<Generator>MSBuild:Compile</Generator>
+			</Page>
+		</ItemGroup>
+	</Target>
+
+	<!-- Clean up preprocessed files -->
+	<Target Name="CleanPreprocessedXaml" AfterTargets="Clean">
+		<RemoveDir Directories="$(PreprocessedXamlDir)" />
 	</Target>
 </Project>

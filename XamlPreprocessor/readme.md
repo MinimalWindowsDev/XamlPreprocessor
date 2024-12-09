@@ -28,6 +28,9 @@ Define your constants through:
 </PropertyGroup>
 ```
 
-## Known Issues
+## Implementation Details
 
-- Currently modifies source XAML files directly (will be fixed in future versions)
+- Creates preprocessed XAML copies in the intermediate build directory
+- Preserves original source files
+- Properly handles UTF-8 encoding with BOM for XAML compatibility
+- Integrates seamlessly with WPF's build process

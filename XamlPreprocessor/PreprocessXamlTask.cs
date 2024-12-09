@@ -2,6 +2,8 @@
 using Microsoft.Build.Utilities;
 using System;
 using System.IO;
+using System.Text;
+using System.Xml;
 using System.Xml.Xsl;
 
 namespace XamlPreprocessor
@@ -27,50 +29,39 @@ namespace XamlPreprocessor
                     return false;
                 }
 
+                var xslt = new XslCompiledTransform();
+                xslt.Load(XsltPath);
+                var parameters = new XsltArgumentList();
+                parameters.AddParam("define_constants", "", DefineConstants);
+
                 foreach (var xamlFile in XamlFiles)
                 {
                     string inputPath = xamlFile.ItemSpec;
                     Log.LogMessage(MessageImportance.Normal, $"Processing {inputPath}");
 
-                    // Create a backup of original file
-                    string backupPath = inputPath + ".original";
-                    File.Copy(inputPath, backupPath, true);
-
                     try
                     {
-                        // Load XSLT
-                        var xslt = new XslCompiledTransform();
-                        xslt.Load(XsltPath);
+                        // Create UTF-8 encoding with BOM
+                        var utf8WithBom = new UTF8Encoding(true);
 
-                        // Setup transform parameters
-                        var parameters = new XsltArgumentList();
-                        parameters.AddParam("define_constants", "", DefineConstants);
-
-                        // Transform the file in place
-                        string tempPath = inputPath + ".temp";
-                        using (var writer = new StreamWriter(tempPath))
+                        using (var memoryStream = new MemoryStream())
+                        using (var writer = new XmlTextWriter(memoryStream, utf8WithBom))
                         {
+                            writer.Formatting = Formatting.Indented;
                             xslt.Transform(inputPath, parameters, writer);
-                        }
+                            writer.Flush();
 
-                        // Replace original with transformed
-                        File.Delete(inputPath);
-                        File.Move(tempPath, inputPath);
+                            // Write the processed content to file
+                            File.WriteAllBytes(inputPath, memoryStream.ToArray());
+                        }
                     }
                     catch (Exception ex)
                     {
-                        // Restore from backup on error
-                        File.Copy(backupPath, inputPath, true);
                         Log.LogError($"Error processing {inputPath}: {ex.Message}");
                         return false;
                     }
-                    finally
-                    {
-                        // Cleanup backup
-                        if (File.Exists(backupPath))
-                            File.Delete(backupPath);
-                    }
                 }
+
                 return true;
             }
             catch (Exception ex)

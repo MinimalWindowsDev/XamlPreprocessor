@@ -1,6 +1,6 @@
 # XAML Preprocessor
 
-A preprocessor for WPF XAML files that enables conditional compilation using XML comments, providing functionality similar to C#'s #if preprocessor directives.
+A preprocessor for WPF XAML files that enables conditional compilation using XML comments, providing functionality similar to C#'s `#if...#endif` preprocessor directives.
 
 ## Features
 
@@ -8,6 +8,8 @@ A preprocessor for WPF XAML files that enables conditional compilation using XML
 - Compatible with existing DefineConstants from C# projects
 - Integrates with MSBuild process
 - Supports both true/false conditions
+- Preserves source files (processes intermediate copies)
+- Full UTF-8 with BOM support for XAML compatibility
 
 ## Usage Example
 
@@ -47,11 +49,12 @@ msbuild.exe /p:DefineConstants="fix_issue_001;feature_002"
 </PropertyGroup>
 ```
 
-## Known Issues & Limitations
+## How It Works
 
-- Currently modifies source XAML files directly instead of intercepting the build process (to be fixed)
-- Requires .NET Framework 4.7.2 or later
-- Only works with WPF projects
+1. During build, creates preprocessed copies of XAML files in the intermediate directory
+2. Applies XSLT transformation based on defined constants
+3. Uses preprocessed copies for compilation while preserving source files
+4. Handles proper UTF-8 encoding with BOM for XAML compatibility
 
 ## Contributing
 
